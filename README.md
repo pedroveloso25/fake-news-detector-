@@ -1,4 +1,3 @@
-Claro, mestre. Preparei um README.md profissional e bem estruturado para o seu projeto, destacando a alta acurácia que você alcançou e a robustez do pipeline de NLP.
 
 🕵️‍♂️ Detector de Fake News com Machine Learning
 Este projeto utiliza técnicas avançadas de Processamento de Linguagem Natural (NLP) e o algoritmo Passive Aggressive Classifier para identificar notícias falsas com alta precisão. O modelo foi treinado utilizando o dataset WELFake, alcançando uma performance excepcional.
