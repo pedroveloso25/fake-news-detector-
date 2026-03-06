@@ -1,4 +1,4 @@
-# 🕵️‍♂️ Detector de Fake News com Machine Learning + Agente IA
+# 🕵️‍♂️ Detector de Fake News com Machine Learning + Agente IA + NLP
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://detectorfakenews.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
