@@ -11,6 +11,4 @@ matplotlib
 seaborn
 google-genai
 python-dotenv
-transformers
-torch
-torchvision
+wordcloud
