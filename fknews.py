@@ -3,7 +3,6 @@ import pandas as pd
 import joblib
 import re
 import spacy
-import en_core_web_sm  # CORREÇÃO 1: Importação direta para evitar o erro E050
 from spacy import displacy
 import os
 import kagglehub
@@ -37,21 +36,13 @@ st.markdown("""
 def load_resources():
     path = kagglehub.dataset_download("saurabhshahane/fake-news-classification")
     df = pd.read_csv(os.path.join(path, "WELFake_Dataset.csv")).dropna(subset=['title', 'text'])
-    
-    # CORREÇÃO 1 (Continuação): Carregamento nativo do modelo
-    nlp_sm = en_core_web_sm.load()
-    
+    nlp_sm = spacy.load("en_core_web_sm")
     model = joblib.load('modelo_fakenews_95.pkl')
     tfidf = joblib.load('vetorizador_tfidf.pkl')
     return df, nlp_sm, model, tfidf
 
 with st.spinner("🚀 Carregando Sistemas de Defesa..."):
-    # Adicionado um bloco try/except para fail-fast caso o Kaggle ou os PKLs falhem
-    try:
-        df_data, nlp, model, tfidf = load_resources()
-    except Exception as e:
-        st.error(f"Erro crítico ao montar defesas: {e}")
-        st.stop()
+    df_data, nlp, model, tfidf = load_resources()
 
 # --- 3. LÓGICA DE LIMPEZA ---
 def clean_text(text):
@@ -77,18 +68,15 @@ with st.sidebar:
         st.write("Análise baseada em amostra do WELFake")
         
         # Gerar WordCloud do Dataset (Amostra de 100)
-        # CORREÇÃO 2: Garantir que a amostra não estoure se o df for menor que 100
-        sample_size = min(100, len(df_data))
-        sample_df = df_data['title'].sample(sample_size)
-        sample_text = " ".join(sample_df)
-        
+        sample_text = " ".join(df_data['title'].sample(100))
         wc = WordCloud(background_color=None, mode="RGBA", colormap="Blues").generate(sample_text)
         fig_wc, ax_wc = plt.subplots()
         ax_wc.imshow(wc); ax_wc.axis("off"); fig_wc.patch.set_alpha(0)
         st.pyplot(fig_wc)
         
         st.markdown("**Principais Termos (Chunks)**")
-        st.bar_chart(sample_df.str.split().str[0].value_counts().head(10))
+        # Exemplo estático dos nomes mais comuns no dataset para performance
+        st.bar_chart(df_data['title'].str.split().str[0].value_counts().head(10))
 
 # --- 5. CABEÇALHO (MAIN) ---
 c1, c2 = st.columns([1, 5])
@@ -105,7 +93,7 @@ target_title, target_content = "", ""
 
 if source == "📝 Texto Livre":
     user_input = st.text_area("Insira o artigo para auditoria:", height=150)
-    if st.button("🔍 ANALISAR TEXTO") and user_input.strip():
+    if st.button("🔍 ANALISAR TEXTO"):
         target_content, target_title = user_input, "Entrada Individual"
 else:
     if st.button("🎲 SORTEAR NOTÍCIA"):
@@ -130,8 +118,8 @@ if target_content:
         </div>
     """, unsafe_allow_html=True)
     
-    # CORREÇÃO 2: Limite de 3000 caracteres no SpaCy para não travar o navegador na aba NLP
-    doc = nlp(target_content[:3000])
+    # Tabs de NLP para a Notícia Atual
+    doc = nlp(target_content)
     tab_xai, tab_nlp = st.tabs(["🤖 Justificativa (XAI)", "🧩 Detalhes NLP (Atual)"])
     
     with tab_xai:
@@ -140,14 +128,12 @@ if target_content:
             try:
                 client = genai.Client(api_key=api_key)
                 prompt = f"Analise por que esta notícia é {'Fake' if pred==1 else 'Real'}. Título: {target_title}. Texto: {target_content[:1000]}"
-                # CORREÇÃO 3: Ajuste de modelo para o padrão estável atual
-                expl = client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
+                expl = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
                 st.markdown(expl.text)
             except Exception as e:
                 st.error("⚠️ Limite de quota atingido ou erro na API do Gemini.")
                 st.info("As outras análises técnicas abaixo continuam disponíveis. Verifique sua chave no console do Google AI Studio ou tente novamente em alguns instantes.")
-        else: 
-            st.warning("Configure o Gemini no .env para ver a justificativa.")
+        else: st.warning("Configure o Gemini no .env para ver a justificativa.")
         
     with tab_nlp:
         col_nlp1, col_nlp2 = st.columns(2)
