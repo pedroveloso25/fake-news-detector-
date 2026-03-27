@@ -187,7 +187,7 @@ jupyter notebook fknews3.ipynb
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
 **Pedro Veloso**  
 Estudante de Ciência de Dados para Negócios — UFPB  
