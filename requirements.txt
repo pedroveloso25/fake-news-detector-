@@ -8,3 +8,4 @@ seaborn
 google-genai
 python-dotenv
 wordcloud
+kagglehub
